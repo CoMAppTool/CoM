@@ -1,6 +1,0 @@
-# Change log
-#
-# 2015-08-17 - Initial code developed
-#
-# 2023-02-15 - preparation for general release on github
-
