@@ -1,0 +1,557 @@
+#!/bin/bash
+#
+# Name: configure  ( for Change of Management program, aka: CoM )
+#
+# Purpose: Let's record our preferred sources and destinations for things to go
+#
+# Author: Ed Drouillard on Feb 8, 2023
+COPYRIGHT="Copyright (C) 2015-2023 Ed Drouillard, BCS, edrulrd at hotmail.com"
+
+
+echo
+echo " #####            #     #  "
+echo "#     #           ##   ##  "
+echo "#                 # # # #  "
+echo "#         #####   #  #  #  "
+echo "#        #     #  #     #  "
+echo "#     #  #     #  #     #  "
+echo " #####    #####   #     #   configuration"
+echo
+
+# set -x # uncomment to debug
+DEBUG=1
+
+OWNER=$(whoami)
+Program=CoM
+
+
+# set up functions
+_MYPRT () {
+	printf "\n%s" "$*"
+}
+
+# confirm fold and tput commands are available
+if $(which fold >/dev/null 2>&1 && which tput >/dev/null 2>&1)
+then
+	_MYWIDTH=$(expr $(tput cols) - 8)
+	_MYPROMPT="fold -s -w ${_MYWIDTH}" 
+else
+	_MYPROMPT="cat"
+fi
+
+
+
+##########################
+# set up default responses
+##########################
+
+#-------------------------------------------------------------------
+# 1. Set default file locations based on who is executing the script
+#-------------------------------------------------------------------
+
+case ${OWNER} in
+	root)
+		CoM_Lib=/var/log/${Program}
+
+		BINDIR=/usr/sbin
+
+		SHRDIR=/usr/share/${Program}/etc
+		ETCDIR=/etc/${Program}/etc
+
+		MANDIR=/usr/share/man/man8
+		;;
+	*)
+		CoM_Lib=$HOME/Documents/${Program}
+
+		BINDIR=$HOME/bin
+
+		SHRDIR=$HOME/Documents/${Program}/etc
+		ETCDIR=$HOME/Documents/${Program}/etc
+		MANDIR=$HOME/Documents/${Program}/man
+		;;
+esac
+		
+# Save DEFAULT locations
+oCoM_Lib=${CoM_Lib} # save original default location
+oBINDIR=${BINDIR}
+oSHRDIR=${SHRDIR}
+oETCDIR=${ETCDIR}
+oMANDIR=${MANDIR}
+
+#-------------------------------------------------------
+# 2. Select a group we will use to store our files under
+#-------------------------------------------------------
+
+# Note, if we are using LDAP, we may not find the group we are going to use in
+# /etc/group, so in that case, we'll simply not verify the group provided by the user.
+
+USING_LDAP=yes # assume using LDAP for the moment
+if test ! $(command -v ldapsearch > /dev/null 2>&1)
+then
+	USING_LDAP=no
+	if test $(grep CoM /etc/group)
+	then
+		CoM_GRP=CoM
+		oCoM_GRP=$CoM_GRP # save preferred original group
+	elif test $(grep wheel /etc/group)
+	then
+		CoM_GRP=wheel
+		oCoM_GRP=$CoM_GRP
+	elif test  $(grep sudo /etc/group)
+	then
+		CoM_GRP=sudo
+		oCoM_GRP=$CoM_GRP
+	else
+		_MYPRT "NOTICE: none of "CoM",  "wheel", nor "sudo" groups exist in /etc/group on this system."
+		CoM_GRP=
+	fi
+fi
+
+#----------------------------------
+# 3. Define our default file locations
+#----------------------------------
+
+# reload our previous answers if we have any.
+# The definitions in this file are loaded by the generated Makefile
+
+MAKE_IN=.configure_answers.sh
+
+# override the user we ran under last time
+echo "OWNER=${OWNER}" >> "${MAKE_IN}"
+
+if test -w ${MAKE_IN}
+then
+	if ! bash -e ${MAKE_IN} # check if our answer script is not okay
+	then
+		echo "ERROR: saved settings for prior runs of ${0} ended with non-zero return code."
+		echo "       Please delete ${MAKE_IN} and re-run ${0}"
+		exit 1
+	else
+		. ${MAKE_IN}
+	fi
+else
+	echo "ERROR: cannot save settings into ${MAKE_IN}"
+	echo "       Please delete ${MAKE_IN} and re-run ${0}"
+	exit 1
+fi
+
+
+echo =============================================================
+echo "${0}: Change of Management (${Program}) configuration script"
+echo =============================================================
+echo
+echo "Note: Default or prior responses are enclosed within [ ... ]"
+echo
+
+
+
+#--------------------------------------------
+# 4. Determine who we are and adjust as needed
+#--------------------------------------------
+
+
+
+case ${OWNER} in
+	root)
+		# We're in what is most likely our normal environment, so just continue
+		;;
+	*)
+		${_MYPROMPT} << zero
+
+
+
+The ${Program} program is typically executed by a select subset of general users (as well as the superuser (root)) to document administrative changes made to a system.  To enable ${Program} to be used by a group of users, it requires that the root user run this ${0} program to properly create a few new configuration files at locations which typically only root would have write-access to.  ${Program} can also be configured for a single user, which would be useful in the case where changes made to a single-user's workstation want to be tracked.  In this case, ${0} can be run as a non-root user to configure ${Program} for that user.
+
+NOTICE: ${0} is not running by the super user, and thus ${Program} will be configured for ${OWNER}'s personal use only.
+zero
+
+        	_MYPRT "Continue? : y[N] "
+		read ans
+		case $ans in
+			[Yy][Ee][Ss]|Y|y)
+				_MYPRT "COMMENT: Proceeding"
+			;;
+
+			*)
+				_MYPRT "Cancelled.  Please switch to the superuser and rerun ${0}."
+				exit 0
+			;;
+		esac
+		;;
+esac
+				
+
+################################################################
+# Okay, let's get going ...
+################################################################
+
+
+#-------------------------------------------------
+# Determine where we will put the change logs into
+#-------------------------------------------------
+
+${_MYPROMPT} << one
+
+
+
+################################################################################
+1.  In a multi-server environment, you may wish to collect the system change log files for all systems into a common shared location.  For example, an NFS mounted, shared filesystem would facilitate sharing of knowledge regarding changes made to other systems.  In this case, it is highly recommended that you append the hostname in the name of the folder to keep all changes for this system together.  A suggested location might be something like /mnt/.../${Program}/$(hostname) depending on your environment.  If you have decided to use a shared location and want to be reminded of your currently mounted NFS file systems, enter L or LIST at the prompt below, or D or DEFAULT to review this system's default location.
+
+On the other hand, if you have no need to share the change logs, you can use the default location, or even specify a location local to your own userid (eg. ${HOME}/Documents/${Program} ) if that better meets your needs.
+
+Specify the destination folder into which ${Program} will save change logs:
+
+one
+
+re_ask=yes
+while [ ${re_ask} = yes ]
+do
+	printf "%s" "Location to store the ${Program} Change logs? [${CoM_Lib}] | L | D : "
+	read l
+
+	case "x${l}" in
+		xL|xLIST)
+			_MYPRT  "Currently mounted NFS filesystems are: "
+			_MYPRT ""
+			_MYPRT ""
+			mount | grep -i "type nfs" | awk '{print $3}'
+			_MYPRT ""
+			;;	
+		xD|xDEFAULT)
+			CoM_Lib=${oCoM_Lib}
+			_MYPRT "Confirm "
+			;;
+		x)
+			re_ask=no
+			;;	
+		*)
+			# confirm only 1 word provided
+			if test $(echo "x${l}" | wc -w) -ne 1 
+			then
+				_MYPRT "Error: avoid whitespace in your folder name"
+				_MYPRT ""
+			else
+				CoM_Lib=$l
+				re_ask=no
+			fi
+			;;
+	esac
+
+done
+
+echo "NOTICE: ${Program}'s Change Library repository will be : ${CoM_Lib}"
+echo "CoM_Lib=${CoM_Lib}" >> ${MAKE_IN}
+
+
+
+#-------------------------------------------
+# Select a good group to save our files into
+#-------------------------------------------
+
+
+${_MYPROMPT} << two
+
+
+################################################################################
+2. We've defined where our change repository will be located.  To reduce the need for system administrators to switch to root to view past changes documented in these files, they should be stored using a common group in which all sysadmins would be members.  Because of the potentially sensitive nature of the contents of recorded system changes, typically non-privileged, general users should not have access to these change logs.
+
+If all sysadmins are in a common group, reviewing and even editing prior change files is facilitated.  Most systems have common groups already defined, eg. "wheel" on Redhat system variants, and "sudo" on debian-based systems.  Users with system administration responsibilities are usually the only members of these groups.
+
+If there is a desire for additional users beyond system administrators to record, view (and edit) changes recorded using ${Program}, another existing group could be used or set up to identify the users concerned.  For example, you may want to create a "CoM" group for this purpose in /etc/group or made available within LDAP.
+
+If you wish to review which groups you are currently a member of, enter [L]IST at the prompt below or [D]EFAULT to review this system's default group.
+
+two
+
+_MYPRT "Specify a common group which System administrators have access to: [${CoM_GRP}] | L | D : "
+
+re_ask=yes
+while [ ${re_ask} = yes ]
+do
+	read g
+	case x${g} in
+		xL|xLIST)
+			_MYPRT "Currently accessible groups are: "
+			groups ${USER}
+			_MYPRT "Specify the group ownership that ${Program} files should be saved with: [${CoM_GRP}] : "
+			;;	
+		xD|xDEFAULT)
+			CoM_GRP=${oCoM_GRP}
+			_MYPRT "Confirm group ownership for ${Program} log files should be saved with: [${CoM_GRP}] : "
+			;;
+		x)
+			if test ! -n "${g}" -a ! -n ${CoM_GRP}
+			then
+				_MYPRT "ERROR: group not specified. Specify an existing group."
+			elif test ${USING_LDAP} = "no" && test ! $(grep ${CoM_GRP} /etc/group)
+			then	
+				_MYPRT "ERROR: group ${CoM_GRP} not found in /etc/group. Specify an existing group."
+				_MYPRT "Specify the group ownership that ${Program} files should be saved with: [${oCoM_GRP}] : "
+				CoM_GRP=${oCoM_GRP}
+			else 
+				re_ask=no
+			fi
+			;;
+		*)
+			# confirm only 1 word provided
+			if test $(echo "x${g}" | wc -w) -ne 1
+			then
+				_MYPRT "ERROR: invalid group name, re-specify. [${oCoM_GRP}] : "
+			elif test ${USING_LDAP} = "no" && test ! $(grep "^${g}" /etc/group)
+			then
+				_MYPRT "ERROR: group ${g} not found in /etc/group. Add it and rerun ${0} specifying it or an existing group. Exiting."
+				exit 1
+			else
+				CoM_GRP=${g} # set it to what we've been given, whether we know if it's valid or not
+				re_ask=no
+			fi
+			;;
+	esac
+done
+
+echo "NOTICE: Files in the Change Library repository will be stored with group : ${CoM_GRP}"
+echo "CoM_GRP=${CoM_GRP}" >> ${MAKE_IN}
+
+
+#--------------------------------------
+# Select where we will execute CoM from
+#--------------------------------------
+
+${_MYPROMPT} << three
+
+
+################################################################################
+3. Define where the executable ${Program} script will be installed. You may enter [D]EFAULT to see the recommended default.
+three
+
+
+_MYPRT "Specify the location to install the ${Program} program to: [${BINDIR}] | D : "
+re_ask=yes
+while [ ${re_ask} = yes ]
+do
+	read b
+	case x${b} in
+		x)
+			if test ! -n "${b}" -a ! -n ${BINDIR}
+			then
+				BINDIR=${oBINDIR}
+				_MYPRT "ERROR: Please specify where the ${Program} program will be located. [${BINDIR}] : "
+			else
+				re_ask=no
+			fi
+			;;
+		xD|xDEFAULT)
+			BINDIR=${oBINDIR}
+			_MYPRT "Confirm the desired location to install the ${Program} program: [${BINDIR}] : "
+			;;
+		*)
+			# confirm only 1 word provided
+			if test $(echo "x${b}" | wc -w) -ne 1
+			then
+				BINDIR=${oBINDIR}
+				_MYPRT "ERROR: invalid location given, re-specify. [${BINDIR}] : "
+			else
+				BINDIR=${b}
+				re_ask=no
+			fi
+			;;
+	esac
+done
+	
+echo "NOTICE: The ${Program} script will run out of : ${BINDIR}"
+echo "BINDIR=${BINDIR}" >> ${MAKE_IN}
+
+
+#-----------------------------------------------------------
+# Select where we will put the system library if we are root
+# along with the library we can override if need be
+#-----------------------------------------------------------
+
+
+${_MYPROMPT} << four
+
+
+################################################################################
+4. The ${Program} program uses a runtime library to obtain it's default settings. Please accept or override the following default location settings. You may enter [D]EFAULT to see the recommended default.
+
+four
+
+case ${OWNER} in
+	root)
+		${_MYPROMPT} << four-1
+   Configuration of ${Program} for the superuser has 2 libraries:
+      By default, the location of the system library containing default settings will be in: ${oSHRDIR},
+      and by default, a system-wide library to override settings in ${SHRDIR} will be located in ${oETCDIR}.
+four-1
+
+		_MYPRT "Specify the location to install ${Program}'s system library: [${SHRDIR}] | D : "
+		re_ask=yes
+		while [ ${re_ask} = yes ]
+		do
+			read s
+			case x${s} in
+				x)
+					if test ! -n "${s}" -a ! -n ${SHRDIR}
+					then
+						SHRDIR=${oSHRDIR}
+						_MYPRT "ERROR: Please specify the location of ${Program}'s system library [${SHRDIR}] : "
+					else
+						re_ask=no
+					fi
+					;;
+				xD|xDEFAULT)
+					SHRDIR=${oSHRDIR}
+					_MYPRT "Confirm the desired location for ${Program}'s system library [${SHRDIR}] : "
+					;;
+				*)
+					# confirm only 1 word provided
+					if test $(echo "x${s}" | wc -w) -ne 1
+					then
+						SHRDIR=${oSHRDIR}
+						_MYPRT "ERROR: invalid location given, re-specify? [${SHRDIR}] : "
+					else
+						SHRDIR=${s}
+						re_ask=no
+					fi
+					;;
+			esac
+		done
+		echo "NOTICE: ${Program}'s system library will be stored in ${SHRDIR}"
+		echo "SHRDIR=${SHRDIR}" >> ${MAKE_IN}
+		;;
+	*)	
+		${_MYPROMPT} << four-2
+   By default, single-user non-superuser configuration settings for ${Program} are defined by settings within: ${oETCDIR}.
+four-2
+		;;
+esac
+
+
+_MYPRT "Specify the location to install the user-modifiable ${Program} library: [${ETCDIR}] | D : "
+re_ask=yes
+while [ ${re_ask} = yes ]
+do
+	read e
+	case x${e} in
+		x)
+			if test ! -n "${e}" -a ! -n ${ETCDIR}
+			then
+				ETCDIR=${oETCDIR}
+				_MYPRT "ERROR: Please specify the location of ${Program}'s user-modifiable library [${ETCDIR}] : "
+			else
+				re_ask=no
+			fi
+			;;
+		xD|xDEFAULT)
+			ETCDIR=${oETCDIR}
+			_MYPRT "Confirm the desired location for ${Program}'s user-modifiable library? [${ETCDIR}] : "
+			;;
+		*)
+			# confirm only 1 word provided
+			if test $(echo "x${e}" | wc -w) -ne 1
+			then
+				ETCDIR=${oETCDIR}
+				_MYPRT "ERROR: invalid location given, re-specify. [${ETCDIR}] : "
+			else
+				ETCDIR=${e}
+				re_ask=no
+			fi
+			;;
+	esac
+done
+
+	
+echo "NOTICE: ${Program}'s user-modifiable library will be stored in ${ETCDIR}"
+echo "ETCDIR=${ETCDIR}" >> ${MAKE_IN}
+
+# we only need one library if on a one-user workstation
+if [ ${OWNER} != "root" ]
+then
+	SHRDIR=${ETCDIR}
+	echo "SHRDIR=${ETCDIR}" >> ${MAKE_IN}
+fi
+
+
+#--------------------------------------------
+# Select where we will put the system manpage
+#--------------------------------------------
+
+${_MYPROMPT} << five
+
+
+################################################################################
+5. Define where ${Program}'s manpage file will be installed. You may enter [D]EFAULT to see the recommended default.
+five
+
+
+_MYPRT "Specify the location to install ${Program}'s Man page to: [${MANDIR}] | D : "
+re_ask=yes
+while [ ${re_ask} = yes ]
+do
+	read m
+	case x${m} in
+		x)
+			if test ! -n "${m}" -a ! -n ${MANDIR}
+			then
+				MANDIR=${oMANDIR}
+				_MYPRT "ERROR: Please specify the location for ${Program}'s manpage to be installed. [${MANDIR}] : "
+			else
+				re_ask=no
+			fi
+			;;
+		xD|xDEFAULT)
+			MANDIR=${oMANDIR}
+			_MYPRT "Confirm the desired location to install ${Program}'s manpage: [${MANDIR}] : "
+			;;
+		*)
+			# confirm only 1 word provided
+			if test $(echo "x${m}" | wc -w) -ne 1
+			then
+				MANDIR=${oMANDIR}
+				_MYPRT "ERROR: invalid location given, re-specify. [${MANDIR}] : "
+			else
+				MANDIR=${m}
+				re_ask=no
+			fi
+			;;
+	esac
+done
+	
+echo "NOTICE: ${Program}'s Manpage will be saved in: ${MANDIR}"
+echo "MANDIR=${MANDIR}" >> ${MAKE_IN}
+
+#---------------------
+# And finally, wrap up
+#---------------------
+
+${_MYPROMPT} << six
+
+
+
+################################################################################
+6. Configuration Complete.  To summarize:
+
+${Program}'s Change log files will be stored in directory: 		${CoM_Lib}
+Files in the Change log repository will be stored with group: 	${CoM_GRP}
+The ${Program} command will execute from: 				${BINDIR}
+${Program}'s system configuration file  will be at: 			${SHRDIR}
+${Program}'s user-modifiable configuration file will be at: 		${ETCDIR}
+${Program}'s help page will be saved in: 				${MANDIR}
+
+Feel free to re-run ${0} if you wish to make any changes.
+
+six
+
+
+if $(which make >/dev/null 2>&1)
+then
+	echo Please run \"make -n install\" to review the Makefile.
+else
+	${_MYPROMPT} << seven
+
+${0} has successfully created the file "Makefile", but the "make" command does not appear to be installed on this system.  Please install it from the distro and then run the "make -n install" command to review what it will do.  Alternatively, you can install ${Program} manually.  See the README file for details.
+	
+seven
+fi
+
+exit
