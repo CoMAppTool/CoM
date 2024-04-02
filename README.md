@@ -9,7 +9,7 @@ Change of (system's) Management - bash utility program to document system admini
 
 Access to the **CoM** command is controlled via group membership.  You do not need to be the superuser to use it.
 
-Note that recording information about the change is completely asynchronous and separate from making the change, and this program's only purpose is just to document the changes being implemented.  It simply adds the documentation that you provde during or after a change and thus, could be used to record information about any desired event.
+Note that recording information about the change is completely asynchronous and separate from making the change, and this program's only purpose is just to document the changes being implemented.  It simply adds the documentation that you provide during or after a change, and thus could be used to record information about any desired event.
 
 ## Purpose
 
@@ -31,9 +31,9 @@ Obviously, **/etc** is not the only location that system administrators make cha
 
 CoM works on Linux, HP-UX, SunOS, AIX etc.
 
-The GitHub Source development tree is available at https://github.com/edrulrd/CoM.  You can clone it to your current working directory via:
+The GitHub Source development tree is available at https://github.com/CoMAppTool/CoM.  You can clone it to your current working directory via:
 
-    git clone https://github.com/edrulrd/CoM
+    git clone https://github.com/CoMAppTool/CoM
     cd CoM
     
 ## Installation of CoM
@@ -57,7 +57,7 @@ After the `make install` command has run, **CoM** is ready to use.
   
 ## Issue Tracker
 
-If you find a problem or bug, want to discuss feature requests, or have some bright new ideas, please create a new issue on our GitHub project page <https://github.com/edrulrd/CoM/issues>.
+If you find a problem or bug, want to discuss feature requests, or have some bright new ideas, please create a new issue on our GitHub project page <https://github.com/CoMAppTool/CoM/issues>.
 When using it, please ensure that any criticism you provide is constructive. Please do not use the issue tracker for general help and assistance with using CoM.
 
 Feel free to open a pull request to fix a problem yourself or to contribute a new feature. 
@@ -77,14 +77,14 @@ Fork the project on github to your account, then on your test system:
     git commit -m 'Explanation of what was changed'
     git push origin master
 
-Then sign-in to your github.com account and click the ‘pull request’ button from the https://github.com/edrulrd/CoM repository.
+Then sign-in to your github.com account and click the "Contribute" button to issue a ‘pull request’ for the maintainer of the https://github.com/CoMAppTool/CoM repository.
 
 ## Credits
 
-Inspiration for maintaining localized, nitty-gritty change logs of this type came from Philip Smith in the 1990's while we were both administering systems at the University of Windsor in Ontario, Canada.
+Inspiration for maintaining localized, nitty-gritty change logs of this type came from Mr. Philip Smith in the 1990's while we were both administering systems at the University of Windsor in Ontario, Canada.
 
 ----
-> $Id: README.md,v 1.00 2020/11/24 21:30:00 edrulrd Exp $
+> $Id: README.md,v 1.00 2020/11/24 21:30:00 edrulrd at hotmail.com Exp $
 
 <!-- Atom:set encoding=utf8 lineEnding=unix grammar=md tabLength=4 useSoftTabs: -->
 <!-- vim:set fileencoding=utf8 fileformat=unix filetype=md tabstop=4 expandtab: -->

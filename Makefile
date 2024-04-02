@@ -1,5 +1,5 @@
-# @(#) $Id: Makefile,v 1.0 2020/12/20 04:59:40 edrulrd
-# ---------------------------------------------------
+# @(#) $Id: Makefile,v 1.0 2020/12/20 04:59:40 edrulrd_at_hotmail.com
+# -------------------------------------------------------------------
 
 .DEFAULT_GOAL := all
 
@@ -31,9 +31,9 @@ MANDIR = /usr/local/man/man8
 OWNER = root
 PERMSD = u=rwx,g=srwx,o=  # allow members of the group to create files in this directory
 PERMSF = u=rw,g=rw,o=
-DATESV = `date +%Y%m%d-%H%M`
+DATESV = $(date +%Y%m%d-%H%M)
 
-# Override the above settings with the responses from running the ./configure script
+# Override the above settings by running the ./configure script
 include .configure_answers.sh
 
 .PHONY: all help install Libs CoM Man uninstall archive clean

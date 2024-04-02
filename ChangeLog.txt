@@ -12,3 +12,6 @@
 #            - Makefile uses "printf" instead of "echo -e"
 #            - documentation changes
 #            - increased version to 0.92
+#
+# 2024-04-01
+#            - re-adjust to use new github.com site at https://github.com/CoMAppTools/CoM

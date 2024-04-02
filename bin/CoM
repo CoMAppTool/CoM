@@ -7,12 +7,12 @@
 # Author: Ed Drouillard on Aug 17, 2015
 COPYRIGHT="Copyright (C) 2015-2024 Ed Drouillard, BCS, edrulrd at hotmail.com"
 #
-# The CoM Package is available at https://www.github.com/edrulrd/CoM
+# The CoM Package is available at https://www.github.com/CoMAppTool/CoM
 #
 
 ################################################################################
-# Note: overiding settings, such as the location of the Change library should go
-#      into /etc/CoM/etc/local.conf
+# Note: overriding settings, such as the location of the Change library should
+#       go into /etc/CoM/etc/local.conf
 ################################################################################
 
 
