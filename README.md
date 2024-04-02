@@ -9,7 +9,7 @@ Change of (system's) Management - bash utility program to document system admini
 
 Access to the **CoM** command is controlled via group membership.  You do not need to be the superuser to use it.
 
-Note that recording information about the change is completely asynchronous and separate from making the change, and this program's only purpose is just to document the changes being implemented.  It simply adds the documentation you specify during or after a change and thus, could be used to record information about any desired event.
+Note that recording information about the change is completely asynchronous and separate from making the change, and this program's only purpose is just to document the changes being implemented.  It simply adds the documentation that you provide during or after a change, and thus could be used to record information about any desired event.
 
 ## Purpose
 
@@ -31,9 +31,9 @@ Obviously, **/etc** is not the only location that system administrators make cha
 
 CoM works on Linux, HP-UX, SunOS, AIX etc.
 
-The GitHub Source development tree is available at https://github.com/CoM-Application/CoM.  You can clone it to your current working directory via:
+The GitHub Source development tree is available at https://github.com/CoMAppTool/CoM.  You can clone it to your current working directory via:
 
-    git clone https://github.com/CoM-Application/CoM
+    git clone https://github.com/CoMAppTool/CoM
     cd CoM
     
 ## Installation of CoM
@@ -43,48 +43,48 @@ Once downloaded, the configure script should be executed to create a Makefile:
 
     ./configure
 
-The configure program defines the locations in the filesystem where the directory which will store the change logs will reside, along with where configuration files are to be placed.  Depending on if you are running as the superuser or not, different locations will be recommended.  It is not necessary that the configuration program be run as root if all the files will strictly be under the domain of the executing user (for example if the system it is being set up for is only used by the one user).  On the other hand, if more than one systems administrator could potentially make changes to a system, then CoM should be configured as *root*.  Note that after it is setup, executing CoM as root is not necessary, as write access to the change repository is provided using group access.  The permissions on this folder are defined to cause group ownership to be propagated to each file, thus allowing any member of the group to review and edit files therein.  Given the possible sensitivity of information in these change logs, members in the group should be restricted to persons responsible for making system administration changes to the system.  Oftentimes, using "wheel" or "sudo" (depending on your distro), can be suitable groups to select when installing.
+The configure program allows the user to define the location of the directory that will store the change logs, along with where configuration files are to be placed.  Depending on if you are running as the superuser or not, different locations will be recommended.  It is not necessary that the configuration program be run as root if all the files will strictly be under the domain of the executing user (for example if the system it is being set up for is only used by the one user).  On the other hand, if more than one systems administrator could potentially make changes to a system, then CoM should be configured as *root*.  Note that after it is set up, executing CoM as root is not necessary, as write access to the change repository is provided using group access.  The permissions on this folder are defined to cause group ownership to be propagated to each file, thus allowing any member of the group to review and edit files therein.  Given the possible sensitivity of information in these change logs, members in the group should be restricted to persons responsible for making system administration changes to the system.  Oftentimes, using "wheel" or "sudo" (depending on your distro), can be suitable groups to select when installing.
 
 
 After ./configure is run, a Makefile is created.  If the make command is installed on the system, (installing make is highly recommended), you can issue the 
 
     make -n install
 
-command to display what the Makefile will do when the command is issued without the -n option.  As usual for open source software, IT IS YOUR RESPONSIBILITY TO ENSURE THAT NOTHING UNTOWARD OCCURS WHEN THE MAKE COMMAND IS RUN.
+command to display what the Makefile will do when the command is issued again without the -n option.  As typical for open source software, IT IS YOUR RESPONSIBILITY TO ENSURE THAT NOTHING UNTOWARD OCCURS WHEN THE MAKE COMMAND IS RUN.
 
 After the `make install` command has run, **CoM** is ready to use.
 
   
 ## Issue Tracker
 
-If you find a problem or bug, want to discuss feature requests, or have some bright new ideas, please create a new issue on our GitHub project page <https://github.com/CoM-Application/CoM/issues.>
+If you find a problem or bug, want to discuss feature requests, or have some bright new ideas, please create a new issue on our GitHub project page <https://github.com/CoMAppTool/CoM/issues>.
 When using it, please ensure that any criticism you provide is constructive. Please do not use the issue tracker for general help and assistance with using CoM.
 
 Feel free to open a pull request to fix a problem yourself or to contribute a new feature. 
 
 ## Contributing on GitHub
 
-To contribute to a project that is hosted on GitHub.com, you first would sign-up for a (free) account. Once signed in, go to the desired project and fork it.  You will then be able to clone your fork locally as indicated below, make any desired changes, then push it back to your GitHub account, and then issue a pull request to request the changes be integrated into the maintainer's source.
+To contribute to a project hosted on GitHub.com, you first would sign-up for a (free) account. Once signed in, go to the desired project and fork it.  You will then be able to clone your fork locally as indicated below, make any desired changes, then push it back to your GitHub account, and then issue a pull request to request the changes be integrated into the maintainer's source.
 
 Please try to keep pull requests as small as possible - one new feature or fix set per pull request is preferred. This makes it easier to review and discuss your contribution.  To summarize the git command-line flow:
 
-Fork project on github:
+Fork the project on github to your account, then on your test system:
 
     git clone https://github.com/your-github-userid/CoM
     cd CoM
-    repeat: (edit), (test) until OK
+    repeat: (edit) and (test) until OK
     git add (modified files)
     git commit -m 'Explanation of what was changed'
     git push origin master
 
-Then sign-in to your github.com account and click the ‘pull request’ button from the https://github.com/CoM-Application/CoM repository.
+Then sign-in to your github.com account and click the "Contribute" button to issue a ‘pull request’ for the maintainer of the https://github.com/CoMAppTool/CoM repository.
 
 ## Credits
 
-Inspiration for maintaining localized, nitty-gritty change logs of this type came from Philip Smith in the 1990's while we were both administering systems at the University of Windsor in Ontario, Canada.
+Inspiration for maintaining localized, nitty-gritty change logs of this type came from Mr. Philip Smith in the 1990's while we were both administering systems at the University of Windsor in Ontario, Canada.
 
 ----
-> $Id: README.md,v 1.00 2020/11/24 21:30:00 edrulrd_at_hotmail.com Exp $
+> $Id: README.md,v 1.00 2020/11/24 21:30:00 edrulrd at hotmail.com Exp $
 
 <!-- Atom:set encoding=utf8 lineEnding=unix grammar=md tabLength=4 useSoftTabs: -->
 <!-- vim:set fileencoding=utf8 fileformat=unix filetype=md tabstop=4 expandtab: -->
