@@ -361,7 +361,7 @@ echo "Edit the file ($Filename)?: (Y|n)"
 read i
 case $i in
 	y|Y|'')
-		case ${EDITOR} in
+		case $(basename ${EDITOR}) in
 			vi|vim)
 				${EDITOR} +/Details:/ +/^$/ $Filename # Go to 1st blank line after Details:
 				;;
