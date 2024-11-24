@@ -289,6 +289,17 @@ done
 [ -z "${OSLevel}" ] && [ -f /etc/system-release ] && OSLevel=$(cat /etc/system-release) # RHEL
 [ -z "${OSLevel}" ] && [ $(which uname) 2> /dev/null ] && OSLevel="$($(which uname) -sr 2>/dev/null)" # Solaris/HPUX/BSD
 
+
+# Show the filesystem that we're using as the root filesystem - useful on multiboot systems if we're sharing a CoMLib (-L option)
+# Set the default value for the UUID of the boot disk in case we don't have the lsblk command installed
+UUID=""
+ROOT=$(df / | head -2 | tail -1 | cut -f1 -d\  ) # get line 2 of df, skipping the title, and ignoring any lines past the 2nd, if any
+if [ $(which lsblk) >/dev/null 2>&1 ]
+then
+	UUID="UUID=$(lsblk -n -o UUID ${ROOT})"
+fi
+ROOT_DISK="${ROOT} ${UUID}"
+
 cat << EOF > $Filename
 [Form: Change of Management]
 
@@ -298,6 +309,7 @@ cat << EOF > $Filename
 [Hostname: $(hostname) ]
 [OS Level: ${OSLevel} ]
 [Kernel: $(uname -a) ]
+[Root disk: ${ROOT_DISK}]
 
 [Installer: $SUDO_USER as $(id -un) ]
 [Installation Date: $Now ]
