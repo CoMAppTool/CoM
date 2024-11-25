@@ -15,3 +15,10 @@
 #
 # 2024-04-01
 #            - re-adjust to use new github.com site at https://github.com/CoMAppTools/CoM
+#
+# 2024-11-23
+#            - fix moving the cursor to the first Details line when EDITOR is set
+#              with the full path
+#            - indicate which is the running system's root disk.  This is useful to know
+#              within which system changes were made when the CoM Library is shared in a
+#              multi-boot environment (i.e if the CoM Lib is in a shared filesystem)
