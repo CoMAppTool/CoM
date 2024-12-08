@@ -89,15 +89,15 @@ USING_LDAP=yes # assume using LDAP for the moment
 if test ! $(command -v ldapsearch > /dev/null 2>&1)
 then
 	USING_LDAP=no
-	if test $(grep CoM /etc/group)
+	if test $(grep -m 1 "CoM:" /etc/group)
 	then
 		CoM_GRP=CoM
 		oCoM_GRP=$CoM_GRP # save preferred original group
-	elif test $(grep wheel /etc/group)
+	elif test $(grep -m 1 "wheel:" /etc/group)
 	then
 		CoM_GRP=wheel
 		oCoM_GRP=$CoM_GRP
-	elif test  $(grep sudo /etc/group)
+	elif test  $(grep -m 1 "sudo:" /etc/group)
 	then
 		CoM_GRP=sudo
 		oCoM_GRP=$CoM_GRP
@@ -283,7 +283,7 @@ do
 			if test ! -n "${g}" -a ! -n ${CoM_GRP}
 			then
 				_MYPRT "ERROR: group not specified. Specify an existing group."
-			elif test ${USING_LDAP} = "no" && test ! $(grep ${CoM_GRP} /etc/group)
+			elif test ${USING_LDAP} = "no" && test ! $(grep -m 1 ${CoM_GRP} /etc/group)
 			then	
 				_MYPRT "ERROR: group ${CoM_GRP} not found in /etc/group. Specify an existing group."
 				_MYPRT "Specify the group ownership that ${Program} files should be saved with: [${oCoM_GRP}] : "
