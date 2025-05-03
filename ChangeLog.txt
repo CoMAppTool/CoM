@@ -1,5 +1,10 @@
 # Change log
 #
+# 2025-05-03
+#            - ignore blank "Summary:" lines that Debian Trixie now adds in apt output
+#            - increase copyright to include 2025
+#            - increased version to 0.94
+#
 # 2024-12-08
 #            - test for and allow multiple entries in the /etc/group file with suggested group 
 #              ownership of our log files

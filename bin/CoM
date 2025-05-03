@@ -5,7 +5,7 @@
 # Purpose: make it easy to document a change
 #
 # Author: Ed Drouillard on Aug 17, 2015
-COPYRIGHT="Copyright (C) 2015-2024 Ed Drouillard, BCS, edrulrd at hotmail.com"
+COPYRIGHT="Copyright (C) 2015-2025 Ed Drouillard, BCS, edrulrd at hotmail.com"
 #
 # The CoM Package is available at https://www.github.com/CoMAppTool/CoM
 #
@@ -197,7 +197,7 @@ then
 	echo
 	\ls -1 ${FileForm} 2>/dev/null | while read i
 	do
-		printf "%s:\n" ${i};  grep "^Summary:" ${i}
+		printf "%s:\n" ${i};  grep "^Summary:" ${i} | grep -vE "^Summary:$"
 		echo # separate with a blank line
 	done
 	exit 0
